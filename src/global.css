@@ -1,11 +1,15 @@
 /* src/global.css */
 
 body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   font-family: sans-serif;
   line-height: 1.5;
 }
 
 img {
   display: block;
-  max-width: 100%;
+  max-width: 30%;
 }

@@ -2,10 +2,35 @@
 
 import Product from "./Product";
 import Button from "./Button";
+import OrderForm from "./OrederForm/OrderForm";
+import SearchForm from "./SearchForm/SearchForm";
+import axios from "axios";
+
+interface Article {
+  objectID: string;
+  title: string;
+  url: string;
+}
+
+interface ArticlesHttpResponse {
+  hits: Article[];
+}
 
 export default function App() {
   const handleSubmit = (formData: FormData) => {
-    console.log("Form submitted");
+    const username = formData.get("username") as string;
+    console.log("Name: ", username);
+  };
+
+  const handleOrder = (data: string) => {
+    console.log("Order received from", data);
+  };
+
+  const handleSearch = async (topic: string) => {
+    const response = await axios.get<ArticlesHttpResponse>(
+      `https://hn.algolia.com/api/v1/search?query=${topic}`
+    );
+    console.log(response.data);
   };
 
   return (
@@ -24,9 +49,11 @@ export default function App() {
       <Button variant="primary" text="Login" />
       <Button variant="secondary" text="Follow" />
       <form action={handleSubmit}>
-        <input type="text" name="username" />
+        <input type="text" name="username" defaultValue="Jhon Doe" />
         <button type="submit">Submit</button>
       </form>
+      <OrderForm onSubmit={handleOrder}></OrderForm>
+      <SearchForm onSubmit={handleSearch} />
     </>
   );
 }
