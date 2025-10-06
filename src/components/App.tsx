@@ -1,22 +1,27 @@
 // src/components/App.tsx
-
-import Product from "./Product";
-import Button from "./Button";
+import { Audio } from "react-loader-spinner";
+import { useState } from "react";
+import Product from "./Product/Product";
+import Button from "./Button/Button";
 import OrderForm from "./OrederForm/OrderForm";
 import SearchForm from "./SearchForm/SearchForm";
 import axios from "axios";
-
-interface Article {
-  objectID: string;
-  title: string;
-  url: string;
-}
+import type { Article } from "../types/article";
+import ArticleList from "./ArticleList/ArticleList";
+import { fetchArticles } from "../services/articleService";
 
 interface ArticlesHttpResponse {
   hits: Article[];
 }
 
 export default function App() {
+  //Оголошуємо стан для запиту на бекенд
+  const [articles, setArticles] = useState<Article[]>([]);
+  //Оголошуємо стан для лоадера
+  const [isLoading, setIsLoading] = useState(false);
+  //Оголошуємо стан для помилки
+  const [isError, setIsError] = useState(false);
+
   const handleSubmit = (formData: FormData) => {
     const username = formData.get("username") as string;
     console.log("Name: ", username);
@@ -27,10 +32,21 @@ export default function App() {
   };
 
   const handleSearch = async (topic: string) => {
-    const response = await axios.get<ArticlesHttpResponse>(
-      `https://hn.algolia.com/api/v1/search?query=${topic}`
-    );
-    console.log(response.data);
+    try {
+      setIsLoading(true);
+      //  Скидаємо стан помилки в false перед кожним запитом
+      setIsError(false);
+      //  Використовуємо HTTP-функцію
+      const data = await fetchArticles(topic);
+      setArticles(data);
+    } catch {
+      //  Встановлюємо стан isError в true
+      setIsError(true);
+    } finally {
+      // Встановлюємо стан isLoading в false
+      // після будь якого результату запиту
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -54,6 +70,20 @@ export default function App() {
       </form>
       <OrderForm onSubmit={handleOrder}></OrderForm>
       <SearchForm onSubmit={handleSearch} />
+      {isLoading && (
+        <Audio
+          height="80"
+          width="80"
+          radius="9"
+          color="green"
+          ariaLabel="three-dots-loading"
+          wrapperStyle
+          wrapperClass
+        />
+      )}
+      {/*  Використовуємо стан isError щоб показати помилку */}
+      {isError && <p>Whoops, something went wrong! Please try again!</p>}
+      {articles.length > 0 && <ArticleList items={articles} />}
     </>
   );
 }
