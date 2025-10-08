@@ -1,18 +1,17 @@
 // src/components/App.tsx
+
+// Loader який порекомендували в навчанні
 import { Audio } from "react-loader-spinner";
+
 import { useState } from "react";
 import Product from "./Product/Product";
 import Button from "./Button/Button";
 import OrderForm from "./OrederForm/OrderForm";
 import SearchForm from "./SearchForm/SearchForm";
-import axios from "axios";
 import type { Article } from "../types/article";
 import ArticleList from "./ArticleList/ArticleList";
 import { fetchArticles } from "../services/articleService";
-
-interface ArticlesHttpResponse {
-  hits: Article[];
-}
+import Modal from "./Modal/Modal";
 
 export default function App() {
   //Оголошуємо стан для запиту на бекенд
@@ -21,6 +20,12 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   //Оголошуємо стан для помилки
   const [isError, setIsError] = useState(false);
+  //Оголошуємо стан для модального вікна
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+
+  const closeModal = () => setIsModalOpen(false);
 
   const handleSubmit = (formData: FormData) => {
     const username = formData.get("username") as string;
@@ -84,6 +89,13 @@ export default function App() {
       {/*  Використовуємо стан isError щоб показати помилку */}
       {isError && <p>Whoops, something went wrong! Please try again!</p>}
       {articles.length > 0 && <ArticleList items={articles} />}
+      <button onClick={openModal}>Open modal</button>
+      {isModalOpen && (
+        <Modal onClose={closeModal}>
+          <h2>Custom Modal Content</h2>
+          <p>This is a reusable modal with dynamic content.</p>
+        </Modal>
+      )}
     </>
   );
 }
